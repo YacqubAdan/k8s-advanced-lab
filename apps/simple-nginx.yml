@@ -31,7 +31,7 @@ spec:
   type: ClusterIP
   ports:
   - name: http
-    protocol: 
+    protocol: TCP
     port: 80
     targetPort: 3000
   - name: app-port
