@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simple-nginx
+  labels:
+    app: simple-nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: simple-nginx
+  template:
+    metadata:
+      labels:
+        app: simple-nginx
+    spec:
+      containers:
+      - name: simple-nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 3000
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: simple-nginx
+spec:
+  selector:
+    app: simple-nginx
+  type: ClusterIP
+  ports:
+  - name: http
+    protocol: 
+    port: 80
+    targetPort: 3000
+  - name: app-port
+    protocol: TCP
+    port: 8086
+    targetPort: 3000
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: simple-nginx-ingress
+  annotations:
+    cert-manager.io/cluster-issuer: "issuer"
+spec:
+  ingressClassName: "nginx"
+  rules:
+  - host: simple-nginx.lab.yacquub.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: simple-nginx
+            port:
+              number: 80
+  tls:
+  - hosts:
+    - simple-nginx.lab.yacquub.com
+    secretName: simple-nginx-tls
